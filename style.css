@@ -1,0 +1,93 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #ffb6c1; /* Light pink */
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #f2e6ff; /* Very light purple */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.auth-section, .music-section, .future-section {
+    margin-bottom: 30px;
+}
+
+input, button, textarea {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.signin-btn {
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+}
+
+.signin-btn:hover {
+    background-color: #45a049;
+}
+
+.login-btn {
+    background-color: #ff0000;
+    color: white;
+    cursor: pointer;
+}
+
+.login-btn:hover {
+    background-color: #cc0000;
+}
+
+.hidden {
+    display: none;
+}
+
+.music-list {
+    margin: 10px 0;
+}
+
+.music-list audio {
+    width: 100%;
+    margin: 10px 0;
+}
+
+.tab-buttons button {
+    width: 48%;
+    margin: 0 1%;
+}
+
+.music-section button {
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+}
+
+.music-section button:hover {
+    background-color: #45a049;
+}
+
+textarea {
+    width: 100%;
+    height: 100px;
+    resize: vertical;
+}
+
+.main-heading {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.future-section a {
+    text-decoration: none;
+    color: #0066cc;
+    display: block;
+    margin: 10px 0;
+}
