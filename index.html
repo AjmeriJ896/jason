@@ -11,6 +11,7 @@
             padding: 20px;
             background-color: #ffb6c1; /* Light pink */
         }
+        
         .container {
             max-width: 800px;
             margin: 0 auto;
@@ -19,68 +20,107 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
+
         .auth-section, .music-section, .future-section {
             margin-bottom: 30px;
         }
+
         input, button, textarea {
             padding: 10px;
             margin: 5px;
             border-radius: 5px;
             border: 1px solid #ddd;
         }
+
         .signin-btn {
             background-color: #4CAF50;
             color: white;
             cursor: pointer;
         }
+
         .signin-btn:hover {
             background-color: #45a049;
         }
+
         .login-btn {
             background-color: #ff0000;
             color: white;
             cursor: pointer;
         }
+
         .login-btn:hover {
             background-color: #cc0000;
         }
+
         .hidden {
             display: none;
         }
+
         .music-list {
             margin: 10px 0;
         }
+
         .music-list audio {
             width: 100%;
             margin: 10px 0;
         }
+
         .tab-buttons button {
             width: 48%;
             margin: 0 1%;
         }
+
         .music-section button {
             background-color: #4CAF50;
             color: white;
             cursor: pointer;
         }
+
         .music-section button:hover {
             background-color: #45a049;
         }
+
         textarea {
             width: 100%;
             height: 100px;
             resize: vertical;
         }
+
         .main-heading {
             text-align: center;
             color: #333;
             margin-bottom: 20px;
         }
+
         .future-section a {
             text-decoration: none;
             color: #0066cc;
             display: block;
             margin: 10px 0;
+        }
+
+        .user-data {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .purchase-options button {
+            margin: 5px;
+            width: 30%;
+        }
+
+        /* Blinking animation for UPI ID text only */
+        .highlight {
+            animation: blink 1s infinite;
+            cursor: pointer; /* Show it's clickable */
+        }
+
+        @keyframes blink {
+            0% { color: #000000; }
+            50% { color: #ff0000; } /* Red */
+            100% { color: #000000; }
         }
     </style>
 </head>
@@ -115,6 +155,20 @@
         </div>
 
         <div class="music-section hidden" id="musicSection">
+            <h2>Welcome</h2>
+            <div class="user-data" id="userData">
+                <h3>Your Login Data</h3>
+                <p><strong>Username:</strong> <span id="currentUsername"></span></p>
+                <p><strong>Last Login:</strong> <span id="lastLogin"></span></p>
+                <div class="purchase-options">
+                    <h4>Purchase Songs</h4>
+                    <button onclick="purchasePlan(5)">5 Songs - $5</button>
+                    <button onclick="purchasePlan(20)">50 Songs - $20</button>
+                    <button onclick="purchasePlan(1)">Free Trial - $1</button>
+                </div>
+                <p id="purchaseMessage"></p>
+            </div>
+
             <h2>Play Music</h2>
             <div class="music-list">
                 <div>
@@ -134,114 +188,167 @@
             <button onclick="signOut()">Sign Out</button>
         </div>
 
-        <div class="future-section">
+        <div class="future-section" id="paymentSection">
             <h2>Our Paid Plans</h2>
             <ul>
                 <li>5 songs in 5$</li>
                 <li>50 songs in 20$</li>
+                <li>Free Trial: 1 song in 1$</li>
             </ul>
             <a href="https://pay.google.com/gp/w/u/0/home/sendmoney?amount=5¤cy=USD" target="_blank">Pay via GPay</a>
-            <p>UPI ID: ajmerijuned7@oksbi</p>
+            <p>UPI ID: <span id="upiId" onclick="redirectToGPay()">ajmerijuned7@oksbi</span></p>
             <br><br><br><br>
             <p>Payment karne ke baad apke choice likhkar humko bhejein. 24 hours ke andar paise wapas aa jayenge, trust issue ka koi khatra nahi hai. Agar aapko aisa lagta hai ki fraud hai, to pehle 1$ dekar 1 song purchase karke dekh lein.</p>
         </div>
     </div>
 
-<script>
-    // localStorage se users load karo, agar pehle se hai to
-    let users = JSON.parse(localStorage.getItem("users")) || {
-        "user123": "pass123" // Default user
-    };
+    <script>
+        // localStorage se users aur login data load karo
+        let users = JSON.parse(localStorage.getItem("users")) || {
+            "user123": "pass123" // Default user
+        };
+        let loginData = JSON.parse(localStorage.getItem("loginData")) || {};
 
-    function showSignIn() {
-        document.getElementById("signinForm").classList.remove("hidden");
-        document.getElementById("loginForm").classList.add("hidden");
-    }
-
-    function showLogIn() {
-        document.getElementById("loginForm").classList.remove("hidden");
-        document.getElementById("signinForm").classList.add("hidden");
-    }
-
-    function signIn() {
-        const username = document.getElementById("signinUsername").value;
-        const password = document.getElementById("signinPassword").value;
-        const message = document.getElementById("signinMessage");
-
-        if (users[username] && users[username] === password) {
-            document.getElementById("authSection").classList.add("hidden");
-            document.getElementById("musicSection").classList.remove("hidden");
-            message.textContent = "";
-        } else {
-            message.textContent = "Galat username ya password! Try again.";
-            message.style.color = "red";
-        }
-    }
-
-    function logIn() {
-        const username = document.getElementById("loginUsername").value;
-        const password = document.getElementById("loginPassword").value;
-        const confirmPassword = document.getElementById("confirmPassword").value;
-        const message = document.getElementById("loginMessage");
-
-        if (!username || !password || !confirmPassword) {
-            message.textContent = "Saare fields bharo!";
-            message.style.color = "red";
-            return;
+        function showSignIn() {
+            document.getElementById("signinForm").classList.remove("hidden");
+            document.getElementById("loginForm").classList.add("hidden");
         }
 
-        if (password !== confirmPassword) {
-            message.textContent = "Passwords match nahi karte!";
-            message.style.color = "red";
-            return;
+        function showLogIn() {
+            document.getElementById("loginForm").classList.remove("hidden");
+            document.getElementById("signinForm").classList.add("hidden");
         }
 
-        if (users[username]) {
-            message.textContent = "Ye username pehle se hai!";
-            message.style.color = "red";
-            return;
+        function signIn() {
+            const username = document.getElementById("signinUsername").value;
+            const password = document.getElementById("signinPassword").value;
+            const message = document.getElementById("signinMessage");
+
+            if (users[username] && users[username] === password) {
+                document.getElementById("authSection").classList.add("hidden");
+                document.getElementById("musicSection").classList.remove("hidden");
+                message.textContent = "";
+
+                // Update login data
+                const currentTime = new Date().toLocaleString();
+                loginData[username] = currentTime;
+                localStorage.setItem("loginData", JSON.stringify(loginData));
+
+                // Display user data
+                document.getElementById("currentUsername").textContent = username;
+                document.getElementById("lastLogin").textContent = currentTime;
+            } else {
+                message.textContent = "Galat username ya password! Try again.";
+                message.style.color = "red";
+            }
         }
 
-        // Naya user add karo aur localStorage mein save karo
-        users[username] = password;
-        localStorage.setItem("users", JSON.stringify(users));
-        message.textContent = "Sign Up successful! Ab Sign In karo.";
-        message.style.color = "green";
-        
-        document.getElementById("loginUsername").value = "";
-        document.getElementById("loginPassword").value = "";
-        document.getElementById("confirmPassword").value = "";
-    }
+        function logIn() {
+            const username = document.getElementById("loginUsername").value;
+            const password = document.getElementById("loginPassword").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+            const message = document.getElementById("loginMessage");
 
-    function signOut() {
-        document.getElementById("musicSection").classList.add("hidden");
-        document.getElementById("authSection").classList.remove("hidden");
-        document.getElementById("signinUsername").value = "";
-        document.getElementById("signinPassword").value = "";
-        document.getElementById("signinMessage").textContent = "";
-        document.getElementById("feedbackText").value = "";
-        document.getElementById("feedbackMessage").textContent = "";
-    }
+            if (!username || !password || !confirmPassword) {
+                message.textContent = "Saare fields bharo!";
+                message.style.color = "red";
+                return;
+            }
 
-    function submitFeedback() {
-        const feedback = document.getElementById("feedbackText").value;
-        const message = document.getElementById("feedbackMessage");
+            if (password !== confirmPassword) {
+                message.textContent = "Passwords match nahi karte!";
+                message.style.color = "red";
+                return;
+            }
 
-        if (!feedback) {
-            message.textContent = "Feedback khali nahi ho sakta!";
-            message.style.color = "red";
-            return;
+            if (users[username]) {
+                message.textContent = "Ye username pehle se hai!";
+                message.style.color = "red";
+                return;
+            }
+
+            // Naya user add karo aur localStorage mein save karo
+            users[username] = password;
+            localStorage.setItem("users", JSON.stringify(users));
+            message.textContent = "Sign Up successful! Ab Sign In karo.";
+            message.style.color = "green";
+            
+            document.getElementById("loginUsername").value = "";
+            document.getElementById("loginPassword").value = "";
+            document.getElementById("confirmPassword").value = "";
         }
 
-        message.textContent = "Feedback submit ho gaya! Shukriya!";
-        message.style.color = "green";
-        document.getElementById("feedbackText").value = "";
-        setTimeout(() => {
-            message.textContent = "";
-        }, 3000);
-    }
+        function signOut() {
+            document.getElementById("musicSection").classList.add("hidden");
+            document.getElementById("authSection").classList.remove("hidden");
+            document.getElementById("signinUsername").value = "";
+            document.getElementById("signinPassword").value = "";
+            document.getElementById("signinMessage").textContent = "";
+            document.getElementById("feedbackText").value = "";
+            document.getElementById("feedbackMessage").textContent = "";
+            document.getElementById("purchaseMessage").textContent = "";
+            // Remove highlight class when signing out
+            document.getElementById("upiId").classList.remove("highlight");
+        }
 
-    showSignIn();
-</script>
+        function submitFeedback() {
+            const feedback = document.getElementById("feedbackText").value;
+            const message = document.getElementById("feedbackMessage");
+
+            if (!feedback) {
+                message.textContent = "Feedback khali nahi ho sakta!";
+                message.style.color = "red";
+                return;
+            }
+
+            message.textContent = "Feedback submit ho gaya! Shukriya!";
+            message.style.color = "green";
+            document.getElementById("feedbackText").value = "";
+            setTimeout(() => {
+                message.textContent = "";
+            }, 3000);
+        }
+
+        function purchasePlan(amount) {
+            const message = document.getElementById("purchaseMessage");
+            const upiIdElement = document.getElementById("upiId");
+            let planDescription;
+
+            if (amount === 5) {
+                planDescription = "5 Songs for $5";
+            } else if (amount === 20) {
+                planDescription = "50 Songs for $20";
+            } else if (amount === 1) {
+                planDescription = "Free Trial - 1 Song for $1";
+            }
+
+            // Open payment link in new tab
+            window.open(`https://pay.google.com/gp/w/u/0/home/sendmoney?amount=${amount}¤cy=USD`, '_blank');
+            
+            message.textContent = `Processing payment for ${planDescription}. Please complete the payment below.`;
+            message.style.color = "green";
+            
+            // Scroll to the payment section
+            document.getElementById("paymentSection").scrollIntoView({ behavior: "smooth" });
+            
+            // Add highlight class to UPI ID text only
+            upiIdElement.classList.add("highlight");
+            
+            // Remove highlight after 5 seconds
+            setTimeout(() => {
+                message.textContent = "";
+                upiIdElement.classList.remove("highlight");
+            }, 5000);
+        }
+
+        function redirectToGPay() {
+            const upiId = "ajmerijuned7@oksbi";
+            // UPI deep link for Google Pay with pre-filled UPI ID
+            const upiLink = `upi://pay?pa=${upiId}&pn=Music%20Portal&cu=INR`;
+            window.open(upiLink, '_blank');
+        }
+
+        showSignIn();
+    </script>
 </body>
 </html>
