@@ -3,171 +3,303 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Islamic Calendar with Server Sync</title>
+    <title>Ajmeri Online Gadlawala</title>
+    <!-- Google Platform Library for Google Sign-In -->
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
     <style>
-        body {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #f0f0f0;
         }
-        .container {
+
+        header {
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            padding: 20px 40px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(30deg);
+            pointer-events: none;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .tagline {
+            font-size: 1.2em;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        .nav-links {
+            margin-top: 15px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #ffe066;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        /* Auth Section */
+        .auth-section {
+            background: #2c3e50;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            align-items: center;
+        }
+
+        .auth-btn {
+            background: #e74c3c;
+            color: white;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .auth-btn:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(231, 76, 60, 0.7);
+        }
+
+        .auth-btn.logout {
+            background: #3498db;
+        }
+
+        .auth-btn.logout:hover {
+            background: #2980b9;
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.7);
+        }
+
+        .username-display {
+            color: white;
+            font-size: 1.1em;
+            text-transform: capitalize;
+        }
+
+        /* Marquee Section */
+        .marquee-section {
+            background: #e74c3c;
+            padding: 10px;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .marquee-text {
+            display: inline-block;
+            color: white;
+            font-size: 1em;
+            animation: marquee 12s linear infinite;
+            will-change: transform;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(100vw); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Popup Styling */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .popup-content {
             background: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #2c3e50;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            position: relative;
             text-align: center;
         }
-        .input-section, .result-section, .moon-section {
-            margin: 20px 0;
-        }
-        input {
-            padding: 8px;
-            margin: 5px;
-        }
-        button {
-            padding: 8px 15px;
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            border-radius: 5px;
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
             cursor: pointer;
+            color: #333;
         }
-        button:hover {
-            background-color: #219653;
+
+        .popup-content h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
         }
-        #moonPhase, #hijriResult, #currentHijri {
-            font-size: 1.2em;
-            margin-top: 10px;
-            color: #34495e;
+
+        /* Google Sign-In Button Styling */
+        .g-signin2 {
+            margin: 10px auto;
+            display: inline-block;
         }
-        .error {
-            color: red;
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            .tagline {
+                font-size: 1em;
+            }
+            .nav-links a {
+                display: block;
+                margin: 10px 0;
+            }
+            .auth-section {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .auth-btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Islamic Calendar & Moon Phase (Server Synced)</h1>
-
-        <!-- Birthdate Input Section -->
-        <div class="input-section">
-            <h3>Find Your Hijri Birthdate</h3>
-            <label>Enter your birthdate (Gregorian):</label><br>
-            <input type="date" id="gregorianDate"><br>
-            <button onclick="convertToHijri()">Convert to Hijri</button>
+    <header>
+        <div class="header-content">
+            <h1>Ajmeri Online Gadlawala</h1>
+            <p class="tagline">Shanti ane Sukun nu Ek Matra Nam</p>
+            <div class="nav-links">
+                <a href="#home">Home</a>
+                <a href="#shop">Shop</a>
+                <a href="#about">About</a>
+                <a href="#contact">Contact</a>
+            </div>
         </div>
+    </header>
+    <section class="auth-section" id="authSection">
+        <button class="auth-btn login" onclick="showLogin()">Login</button>
+    </section>
+    <div class="marquee-section">
+        <span class="marquee-text">100% Pure Cotton - All India Delivery</span>
+    </div>
 
-        <!-- Result Section -->
-        <div class="result-section">
-            <h3>Your Hijri Birthdate:</h3>
-            <p id="hijriResult">Enter a date to see the Hijri equivalent</p>
-        </div>
-
-        <!-- Current Hijri Date & Moon Phase -->
-        <div class="moon-section">
-            <h3>Today in Islamic Calendar</h3>
-            <p id="currentHijri">Loading...</p>
-            <h3>Moon Phase Today</h3>
-            <p id="moonPhase">Loading...</p>
+    <!-- Login Popup -->
+    <div class="popup" id="loginPopup">
+        <div class="popup-content">
+            <span class="close-btn" onclick="hideLogin()">×</span>
+            <h2>Login with Google</h2>
+            <!-- Google Sign-In Button -->
+            <div class="g-signin2" data-onsuccess="onGoogleSignIn" data-theme="dark"></div>
         </div>
     </div>
 
     <script>
-        // Function to fetch Hijri date from Aladhan API
-        async function fetchHijriDate(gregorianDate) {
-            const [year, month, day] = gregorianDate.split('-');
-            const url = `http://api.aladhan.com/v1/gToH?date=${day}-${month}-${year}`;
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                if (data.code === 200) {
-                    const hijri = data.data.hijri;
-                    return `${hijri.day} ${hijri.month.en} ${hijri.year} AH`;
-                } else {
-                    throw new Error('API Error');
-                }
-            } catch (error) {
-                consoleសthrow new Error(`Failed to fetch Hijri date: ${error.message}`);
+        let isLoggedIn = false;
+        let userData = null;
+
+        // Google Sign-In Client ID (Replace with your own Client ID)
+        const meta = document.createElement('meta');
+        meta.name = "google-signin-client_id";
+        meta.content = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"; // Replace with your Client ID
+        document.getElementsByTagName('head')[0].appendChild(meta);
+
+        // Show/Hide Login Popup
+        function showLogin() {
+            if (!isLoggedIn) {
+                document.getElementById('loginPopup').style.display = 'flex';
             }
         }
 
-        // Enhanced Convert to Hijri function with server sync
-        async function convertToHijri() {
-            const gregorianInput = document.getElementById('gregorianDate').value;
-            const resultElement = document.getElementById('hijriResult');
+        function hideLogin() {
+            document.getElementById('loginPopup').style.display = 'none';
+        }
 
-            // Input validation
-            if (!gregorianInput) {
-                resultElement.innerHTML = '<span class="error">Please select a valid date!</span>';
-                return;
-            }
+        // Handle Google Sign-In
+        function onGoogleSignIn(googleUser) {
+            const profile = googleUser.getBasicProfile();
+            userData = {
+                username: profile.getName(),
+                email: profile.getEmail(),
+                password: null // Google handles authentication, no password needed
+            };
+            isLoggedIn = true;
+            alert('Google Login Successful! Welcome, ' + userData.username);
+            updateAuthSection();
+            hideLogin();
+            console.log('Google User Data:', {
+                ID: profile.getId(),
+                Name: profile.getName(),
+                Email: profile.getEmail(),
+                Image: profile.getImageUrl()
+            });
+            // Optionally sign out from Google to avoid affecting other sites
+            googleUser.disconnect();
+        }
 
-            const gregorianDate = new Date(gregorianInput);
-            const today = new Date();
-
-            if (isNaN(gregorianDate.getTime())) {
-                resultElement.innerHTML = '<span class="error">Invalid date format!</span>';
-                return;
-            } else if (gregorianDate > today) {
-                resultElement.innerHTML = '<span class="error">Future dates are not allowed!</span>';
-                return;
-            }
-
-            try {
-                const hijriString = await fetchHijriDate(gregorianInput);
-                resultElement.innerHTML = hijriString;
-            } catch (error) {
-                resultElement.innerHTML = `<span class="error">${error.message}</span>`;
+        // Update Auth Section
+        function updateAuthSection() {
+            const authSection = document.getElementById('authSection');
+            if (isLoggedIn) {
+                authSection.innerHTML = `
+                    <span class="username-display">Welcome, ${userData.username}</span>
+                    <button class="auth-btn logout" onclick="handleLogout()">Logout</button>
+                `;
+            } else {
+                authSection.innerHTML = `
+                    <button class="auth-btn login" onclick="showLogin()">Login</button>
+                `;
             }
         }
 
-        // Function to update current Hijri date from server
-        async function updateCurrentHijri() {
-            const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-            try {
-                const hijriString = await fetchHijriDate(today);
-                document.getElementById('currentHijri').innerText = hijriString;
-            } catch (error) {
-                document.getElementById('currentHijri').innerText = `Error: ${error.message}`;
-            }
+        // Handle Logout
+        function handleLogout() {
+            isLoggedIn = false;
+            userData = null;
+            alert('Logged out successfully!');
+            updateAuthSection();
         }
-
-        // Function to calculate moon phase (simplified, local)
-        function getMoonPhase() {
-            const today = new Date();
-            const epoch = new Date('1970-01-01');
-            const daysSinceEpoch = Math.floor((today - epoch) / (1000 * 60 * 60 * 24));
-            const lunarCycle = 29.53; // Average lunar cycle in days
-            const phase = daysSinceEpoch % lunarCycle;
-
-            let phaseName;
-            if (phase < 1.84566) phaseName = "New Moon 🌑";
-            else if (phase < 5.53699) phaseName = "Waxing Crescent 🌒";
-            else if (phase < 9.22831) phaseName = "First Quarter 🌓";
-            else if (phase < 12.91963) phaseName = "Waxing Gibbous 🌔";
-            else if (phase < 16.61096) phaseName = "Full Moon 🌕";
-            else if (phase < 20.30228) phaseName = "Waning Gibbous 🌖";
-            else if (phase < 23.99361) phaseName = "Last Quarter 🌗";
-            else if (phase < 27.68493) phaseName = "Waning Crescent 🌘";
-            else phaseName = "New Moon 🌑";
-
-            document.getElementById('moonPhase').innerText = phaseName;
-        }
-
-        // Update on page load and daily
-        window.onload = function() {
-            updateCurrentHijri();
-            getMoonPhase();
-            setInterval(() => {
-                updateCurrentHijri();
-                getMoonPhase();
-            }, 24 * 60 * 60 * 1000); // Update every 24 hours
-        };
     </script>
 </body>
 </html>
