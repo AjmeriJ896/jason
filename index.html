@@ -3,11 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Replace YOUR_GOOGLE_CLIENT_ID with your actual Client ID -->
-    <meta name="google-signin-client_id" content="810557090213-af6lpgbcc1gq73vg4gnpm16n6g52014u.apps.googleusercontent.com">
-    <meta name="google-signin-scope" content="profile email">
     <title>Ajmeri Online Gadlawala</title>
-    <script src="https://apis.google.com/js/platform.js?onload=onGoogleLoad" async defer></script>
     <style>
         * {
             margin: 0;
@@ -103,11 +99,11 @@
             box-shadow: 0 0 15px rgba(231, 76, 60, 0.7);
         }
 
-        .auth-btn.logout {
+        .auth-btn.signup, .auth-btn.logout {
             background: #3498db;
         }
 
-        .auth-btn.logout:hover {
+        .auth-btn.signup:hover, .auth-btn.logout:hover {
             background: #2980b9;
             box-shadow: 0 0 15px rgba(52, 152, 219, 0.7);
         }
@@ -160,7 +156,6 @@
             max-width: 400px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
             position: relative;
-            text-align: center;
         }
 
         .close-btn {
@@ -177,9 +172,28 @@
             color: #2c3e50;
         }
 
-        .g-signin2 {
-            margin: 10px auto;
-            display: inline-block;
+        .popup-content input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        .popup-content button {
+            width: 100%;
+            padding: 10px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .popup-content button:hover {
+            background: #2980b9;
         }
 
         @media (max-width: 768px) {
@@ -206,16 +220,36 @@
     </header>
     <section class="auth-section" id="authSection">
         <button class="auth-btn login" onclick="showLogin()">Login</button>
+        <button class="auth-btn signup" onclick="showSignup()">Sign Up</button>
     </section>
     <div class="marquee-section">
         <span class="marquee-text">100% Pure Cotton - All India Delivery</span>
     </div>
 
+    <!-- Sign Up Popup -->
+    <div class="popup" id="signupPopup">
+        <div class="popup-content">
+            <span class="close-btn" onclick="hideSignup()">×</span>
+            <h2>Sign Up</h2>
+            <form id="signupForm" onsubmit="handleSignup(event)">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit">Sign Up</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Login Popup -->
     <div class="popup" id="loginPopup">
         <div class="popup-content">
             <span class="close-btn" onclick="hideLogin()">×</span>
-            <h2>Login with Google</h2>
-            <div class="g-signin2" data-onsuccess="onGoogleSignIn" data-theme="dark"></div>
+            <h2>Login</h2>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <input type="email" id="loginEmail" placeholder="Email" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
         </div>
     </div>
 
@@ -223,20 +257,18 @@
         let isLoggedIn = false;
         let userData = null;
 
-        // Callback when Google API loads
-        function onGoogleLoad() {
-            gapi.load('auth2', function() {
-                gapi.auth2.init({
-                    client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com', // Replace with your Client ID
-                    scope: 'profile email'
-                }).then(function() {
-                    console.log('Google Auth2 Initialized Successfully');
-                }).catch(function(error) {
-                    console.error('Google Auth2 Initialization Failed:', error);
-                });
-            });
+        // Show/Hide Sign Up Popup
+        function showSignup() {
+            if (!isLoggedIn) {
+                document.getElementById('signupPopup').style.display = 'flex';
+            }
         }
 
+        function hideSignup() {
+            document.getElementById('signupPopup').style.display = 'none';
+        }
+
+        // Show/Hide Login Popup
         function showLogin() {
             if (!isLoggedIn) {
                 document.getElementById('loginPopup').style.display = 'flex';
@@ -247,25 +279,43 @@
             document.getElementById('loginPopup').style.display = 'none';
         }
 
-        function onGoogleSignIn(googleUser) {
-            const profile = googleUser.getBasicProfile();
-            userData = {
-                username: profile.getName(),
-                email: profile.getEmail()
-            };
-            isLoggedIn = true;
-            alert('Google Login Successful! Welcome, ' + userData.username);
-            updateAuthSection();
-            hideLogin();
-            console.log('Google User Data:', {
-                ID: profile.getId(),
-                Name: profile.getName(),
-                Email: profile.getEmail(),
-                Image: profile.getImageUrl()
-            });
-            googleUser.disconnect();
+        // Handle Sign Up
+        function handleSignup(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (username && email && password) {
+                userData = { username, email, password };
+                console.log('Sign Up Data:', userData);
+                alert('Sign Up Successful! Please log in.');
+                hideSignup();
+                document.getElementById('signupForm').reset();
+                showLogin(); // Directly show login popup after signup
+            } else {
+                alert('Please fill in all fields!');
+            }
         }
 
+        // Handle Login
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (userData && email === userData.email && password === userData.password) {
+                isLoggedIn = true;
+                alert('Login Successful! Welcome back, ' + userData.username);
+                updateAuthSection();
+                hideLogin();
+                document.getElementById('loginForm').reset();
+            } else {
+                alert('Invalid email or password!');
+            }
+        }
+
+        // Update Auth Section
         function updateAuthSection() {
             const authSection = document.getElementById('authSection');
             if (isLoggedIn) {
@@ -276,10 +326,12 @@
             } else {
                 authSection.innerHTML = `
                     <button class="auth-btn login" onclick="showLogin()">Login</button>
+                    <button class="auth-btn signup" onclick="showSignup()">Sign Up</button>
                 `;
             }
         }
 
+        // Handle Logout
         function handleLogout() {
             isLoggedIn = false;
             userData = null;
