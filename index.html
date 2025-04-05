@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google Sign-In Client ID (Replace with your actual Client ID) -->
+    <meta name="google-signin-client_id" content="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com">
+    <meta name="google-signin-scope" content="profile email">
     <title>Ajmeri Online Gadlawala</title>
-    <!-- Google Platform Library for Google Sign-In -->
+    <!-- Google Platform Library -->
     <script src="https://apis.google.com/js/platform.js" async defer></script>
     <style>
         * {
@@ -72,7 +75,6 @@
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
         }
 
-        /* Auth Section */
         .auth-section {
             background: #2c3e50;
             padding: 15px 40px;
@@ -117,7 +119,6 @@
             text-transform: capitalize;
         }
 
-        /* Marquee Section */
         .marquee-section {
             background: #e74c3c;
             padding: 10px;
@@ -139,7 +140,6 @@
             100% { transform: translateX(-100%); }
         }
 
-        /* Popup Styling */
         .popup {
             display: none;
             position: fixed;
@@ -178,30 +178,17 @@
             color: #2c3e50;
         }
 
-        /* Google Sign-In Button Styling */
         .g-signin2 {
             margin: 10px auto;
             display: inline-block;
         }
 
         @media (max-width: 768px) {
-            h1 {
-                font-size: 1.8em;
-            }
-            .tagline {
-                font-size: 1em;
-            }
-            .nav-links a {
-                display: block;
-                margin: 10px 0;
-            }
-            .auth-section {
-                flex-direction: column;
-                gap: 10px;
-            }
-            .auth-btn {
-                width: 100%;
-            }
+            h1 { font-size: 1.8em; }
+            .tagline { font-size: 1em; }
+            .nav-links a { display: block; margin: 10px 0; }
+            .auth-section { flex-direction: column; gap: 10px; }
+            .auth-btn { width: 100%; }
         }
     </style>
 </head>
@@ -230,7 +217,6 @@
         <div class="popup-content">
             <span class="close-btn" onclick="hideLogin()">×</span>
             <h2>Login with Google</h2>
-            <!-- Google Sign-In Button -->
             <div class="g-signin2" data-onsuccess="onGoogleSignIn" data-theme="dark"></div>
         </div>
     </div>
@@ -239,11 +225,19 @@
         let isLoggedIn = false;
         let userData = null;
 
-        // Google Sign-In Client ID (Replace with your own Client ID)
-        const meta = document.createElement('meta');
-        meta.name = "google-signin-client_id";
-        meta.content = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"; // Replace with your Client ID
-        document.getElementsByTagName('head')[0].appendChild(meta);
+        // Initialize Google Sign-In
+        function onLoad() {
+            gapi.load('auth2', function() {
+                gapi.auth2.init({
+                    client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com', // Replace with your Client ID
+                    scope: 'profile email'
+                }).then(function() {
+                    console.log('Google Auth2 Initialized');
+                }).catch(function(error) {
+                    console.error('Google Auth2 Init Failed:', error);
+                });
+            });
+        }
 
         // Show/Hide Login Popup
         function showLogin() {
@@ -261,8 +255,7 @@
             const profile = googleUser.getBasicProfile();
             userData = {
                 username: profile.getName(),
-                email: profile.getEmail(),
-                password: null // Google handles authentication, no password needed
+                email: profile.getEmail()
             };
             isLoggedIn = true;
             alert('Google Login Successful! Welcome, ' + userData.username);
@@ -274,8 +267,7 @@
                 Email: profile.getEmail(),
                 Image: profile.getImageUrl()
             });
-            // Optionally sign out from Google to avoid affecting other sites
-            googleUser.disconnect();
+            googleUser.disconnect(); // Disconnect to avoid session persistence
         }
 
         // Update Auth Section
@@ -300,6 +292,11 @@
             alert('Logged out successfully!');
             updateAuthSection();
         }
+
+        // Load Google API on page load
+        window.onload = function() {
+            onLoad();
+        };
     </script>
 </body>
 </html>
