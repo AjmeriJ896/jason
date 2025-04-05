@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajmeri Online Gadlawala</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
     <style>
         * {
             margin: 0;
@@ -254,10 +258,44 @@
     </div>
 
     <script>
+        // Your Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA1uR_cMqX_F3_-tBy51UlxCQMoIeBjGws",
+            authDomain: "ajmerionline-67e32.firebaseapp.com",
+            projectId: "ajmerionline-67e32",
+            storageBucket: "ajmerionline-67e32.firebasestorage.app",
+            messagingSenderId: "807508767510",
+            appId: "1:807508767510:web:aa367978ba87adfe7f5637",
+            measurementId: "G-S5CPKK0N47"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
         let isLoggedIn = false;
         let userData = null;
 
-        // Show/Hide Sign Up Popup
+        // Check auth state on page load
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                isLoggedIn = true;
+                db.collection('users').doc(user.uid).get().then((doc) => {
+                    if (doc.exists) {
+                        userData = doc.data();
+                        updateAuthSection();
+                    }
+                }).catch((error) => {
+                    console.error("Error fetching user data:", error);
+                });
+            } else {
+                isLoggedIn = false;
+                userData = null;
+                updateAuthSection();
+            }
+        });
+
         function showSignup() {
             if (!isLoggedIn) {
                 document.getElementById('signupPopup').style.display = 'flex';
@@ -268,7 +306,6 @@
             document.getElementById('signupPopup').style.display = 'none';
         }
 
-        // Show/Hide Login Popup
         function showLogin() {
             if (!isLoggedIn) {
                 document.getElementById('loginPopup').style.display = 'flex';
@@ -279,43 +316,56 @@
             document.getElementById('loginPopup').style.display = 'none';
         }
 
-        // Handle Sign Up
         function handleSignup(event) {
             event.preventDefault();
             const username = document.getElementById('username').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            if (username && email && password) {
-                userData = { username, email, password };
-                console.log('Sign Up Data:', userData);
-                alert('Sign Up Successful! Please log in.');
-                hideSignup();
-                document.getElementById('signupForm').reset();
-                showLogin(); // Directly show login popup after signup
-            } else {
-                alert('Please fill in all fields!');
-            }
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    return db.collection('users').doc(user.uid).set({
+                        username: username,
+                        email: email
+                    });
+                })
+                .then(() => {
+                    alert('Sign Up Successful! Please log in.');
+                    hideSignup();
+                    document.getElementById('signupForm').reset();
+                    showLogin();
+                })
+                .catch((error) => {
+                    alert('Error: ' + error.message);
+                });
         }
 
-        // Handle Login
         function handleLogin(event) {
             event.preventDefault();
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
 
-            if (userData && email === userData.email && password === userData.password) {
-                isLoggedIn = true;
-                alert('Login Successful! Welcome back, ' + userData.username);
-                updateAuthSection();
-                hideLogin();
-                document.getElementById('loginForm').reset();
-            } else {
-                alert('Invalid email or password!');
-            }
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    return db.collection('users').doc(user.uid).get();
+                })
+                .then((doc) => {
+                    if (doc.exists) {
+                        userData = doc.data();
+                        isLoggedIn = true;
+                        alert('Login Successful! Welcome back, ' + userData.username);
+                        updateAuthSection();
+                        hideLogin();
+                        document.getElementById('loginForm').reset();
+                    }
+                })
+                .catch((error) => {
+                    alert('Error: ' + error.message);
+                });
         }
 
-        // Update Auth Section
         function updateAuthSection() {
             const authSection = document.getElementById('authSection');
             if (isLoggedIn) {
@@ -331,12 +381,15 @@
             }
         }
 
-        // Handle Logout
         function handleLogout() {
-            isLoggedIn = false;
-            userData = null;
-            alert('Logged out successfully!');
-            updateAuthSection();
+            auth.signOut().then(() => {
+                isLoggedIn = false;
+                userData = null;
+                alert('Logged out successfully!');
+                updateAuthSection();
+            }).catch((error) => {
+                alert('Error: ' + error.message);
+            });
         }
     </script>
 </body>
