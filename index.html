@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Google Sign-In Client ID (Replace with your actual Client ID) -->
+    <!-- Replace YOUR_GOOGLE_CLIENT_ID with your actual Client ID -->
     <meta name="google-signin-client_id" content="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com">
     <meta name="google-signin-scope" content="profile email">
     <title>Ajmeri Online Gadlawala</title>
-    <!-- Google Platform Library -->
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="https://apis.google.com/js/platform.js?onload=onGoogleLoad" async defer></script>
     <style>
         * {
             margin: 0;
@@ -212,7 +211,6 @@
         <span class="marquee-text">100% Pure Cotton - All India Delivery</span>
     </div>
 
-    <!-- Login Popup -->
     <div class="popup" id="loginPopup">
         <div class="popup-content">
             <span class="close-btn" onclick="hideLogin()">×</span>
@@ -225,21 +223,20 @@
         let isLoggedIn = false;
         let userData = null;
 
-        // Initialize Google Sign-In
-        function onLoad() {
+        // Callback when Google API loads
+        function onGoogleLoad() {
             gapi.load('auth2', function() {
                 gapi.auth2.init({
-                    client_id: '810557090213-af6lpgbcc1gq73vg4gnpm16n6g52014u.apps.googleusercontent.com', // Replace with your Client ID
+                    client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com', // Replace with your Client ID
                     scope: 'profile email'
                 }).then(function() {
-                    console.log('Google Auth2 Initialized');
+                    console.log('Google Auth2 Initialized Successfully');
                 }).catch(function(error) {
-                    console.error('Google Auth2 Init Failed:', error);
+                    console.error('Google Auth2 Initialization Failed:', error);
                 });
             });
         }
 
-        // Show/Hide Login Popup
         function showLogin() {
             if (!isLoggedIn) {
                 document.getElementById('loginPopup').style.display = 'flex';
@@ -250,7 +247,6 @@
             document.getElementById('loginPopup').style.display = 'none';
         }
 
-        // Handle Google Sign-In
         function onGoogleSignIn(googleUser) {
             const profile = googleUser.getBasicProfile();
             userData = {
@@ -267,10 +263,9 @@
                 Email: profile.getEmail(),
                 Image: profile.getImageUrl()
             });
-            googleUser.disconnect(); // Disconnect to avoid session persistence
+            googleUser.disconnect();
         }
 
-        // Update Auth Section
         function updateAuthSection() {
             const authSection = document.getElementById('authSection');
             if (isLoggedIn) {
@@ -285,18 +280,12 @@
             }
         }
 
-        // Handle Logout
         function handleLogout() {
             isLoggedIn = false;
             userData = null;
             alert('Logged out successfully!');
             updateAuthSection();
         }
-
-        // Load Google API on page load
-        window.onload = function() {
-            onLoad();
-        };
     </script>
 </body>
 </html>
