@@ -3,394 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajmeri Online Gadlawala</title>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <title>MyLoops - Music Loops</title>
     <style>
-        * {
+        /* CSS */
+        body {
             margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            overflow-x: hidden;
         }
 
-        header {
-            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+        /* Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             padding: 20px 40px;
-            color: white;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            position: relative;
-            overflow: hidden;
+            background: #0f0f0f;
+            box-shadow: 0 2px 10px RGBA(255, 0, 255, 0.2);
         }
 
-        header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: rgba(255, 255, 255, 0.1);
-            transform: rotate(30deg);
-            pointer-events: none;
-        }
-
-        .header-content {
-            position: relative;
-            z-index: 1;
-        }
-
-        h1 {
-            font-size: 2.5em;
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff00ff;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .tagline {
-            font-size: 1.2em;
-            font-style: italic;
-            opacity: 0.9;
         }
 
         .nav-links {
-            margin-top: 15px;
+            list-style: none;
+            display: flex;
+            gap: 20px;
+            margin: 0;
         }
 
         .nav-links a {
-            color: white;
+            color: #fff;
             text-decoration: none;
-            margin: 0 15px;
-            font-size: 1.1em;
-            transition: all 0.3s ease;
+            font-size: 16px;
+            transition: color 0.3s ease;
         }
 
         .nav-links a:hover {
-            color: #ffe066;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            color: #ff00ff;
         }
 
-        .auth-section {
-            background: #2c3e50;
-            padding: 15px 40px;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-            align-items: center;
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 100px 20px;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            color: transparent;
         }
 
-        .auth-btn {
-            background: #e74c3c;
-            color: white;
-            padding: 10px 25px;
-            border: none;
-            border-radius: 25px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .hero h1 {
+            font-size: 60px;
+            margin: 0;
+            text-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
         }
 
-        .auth-btn:hover {
-            background: #c0392b;
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(231, 76, 60, 0.7);
-        }
-
-        .auth-btn.signup, .auth-btn.logout {
-            background: #3498db;
-        }
-
-        .auth-btn.signup:hover, .auth-btn.logout:hover {
-            background: #2980b9;
-            box-shadow: 0 0 15px rgba(52, 152, 219, 0.7);
-        }
-
-        .username-display {
-            color: white;
-            font-size: 1.1em;
-            text-transform: capitalize;
-        }
-
-        .marquee-section {
-            background: #e74c3c;
-            padding: 10px;
-            overflow: hidden;
-            white-space: nowrap;
-            position: relative;
-        }
-
-        .marquee-text {
-            display: inline-block;
-            color: white;
-            font-size: 1em;
-            animation: marquee 12s linear infinite;
-            will-change: transform;
-        }
-
-        @keyframes marquee {
-            0% { transform: translateX(100vw); }
-            100% { transform: translateX(-100%); }
-        }
-
-        .popup {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-        }
-
-        .popup-content {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-            position: relative;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
+        .hero p {
             font-size: 20px;
-            cursor: pointer;
-            color: #333;
+            color: #fff;
+            margin: 20px 0;
         }
 
-        .popup-content h2 {
-            margin-bottom: 20px;
-            color: #2c3e50;
-        }
-
-        .popup-content input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1em;
-        }
-
-        .popup-content button {
-            width: 100%;
-            padding: 10px;
-            background: #3498db;
-            color: white;
+        .cta-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: #ff00ff;
             border: none;
-            border-radius: 5px;
+            color: #fff;
+            border-radius: 25px;
             cursor: pointer;
-            transition: background 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .popup-content button:hover {
-            background: #2980b9;
+        .cta-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.7);
         }
 
+        /* Loop Gallery */
+        .gallery {
+            padding: 50px 20px;
+            text-align: center;
+        }
+
+        .gallery h2 {
+            font-size: 36px;
+            color: #00ffff;
+            margin-bottom: 40px;
+        }
+
+        .coming-soon {
+            font-size: 24px;
+            color: #ff00ff;
+            text-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+            padding: 20px;
+            background: #2a2a2a;
+            border-radius: 10px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
-            h1 { font-size: 1.8em; }
-            .tagline { font-size: 1em; }
-            .nav-links a { display: block; margin: 10px 0; }
-            .auth-section { flex-direction: column; gap: 10px; }
-            .auth-btn { width: 100%; }
+            .hero h1 { font-size: 40px; }
+            .nav-links { gap: 10px; }
+            .coming-soon { font-size: 20px; }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="header-content">
-            <h1>Ajmeri Online Gadlawala</h1>
-            <p class="tagline">Shanti ane Sukun nu Ek Matra Nam</p>
-            <div class="nav-links">
-                <a href="#home">Home</a>
-                <a href="#shop">Shop</a>
-                <a href="#about">About</a>
-                <a href="#contact">Contact</a>
-            </div>
-        </div>
-    </header>
-    <section class="auth-section" id="authSection">
-        <button class="auth-btn login" onclick="showLogin()">Login</button>
-        <button class="auth-btn signup" onclick="showSignup()">Sign Up</button>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">MyLoops</div>
+        <ul class="nav-links">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Loops</a></li>
+            <li><a href="#">Upload</a></li>
+            <li><a href="#">Community</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Unleash Your Rhythm</h1>
+        <p>Discover seductive loops and beats to ignite your next track.</p>
+        <button class="cta-btn">Explore Now</button>
     </section>
-    <div class="marquee-section">
-        <span class="marquee-text">100% Pure Cotton - All India Delivery</span>
-    </div>
 
-    <!-- Sign Up Popup -->
-    <div class="popup" id="signupPopup">
-        <div class="popup-content">
-            <span class="close-btn" onclick="hideSignup()">×</span>
-            <h2>Sign Up</h2>
-            <form id="signupForm" onsubmit="handleSignup(event)">
-                <input type="text" id="username" placeholder="Username" required>
-                <input type="email" id="email" placeholder="Email" required>
-                <input type="password" id="password" placeholder="Password" required>
-                <button type="submit">Sign Up</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Login Popup -->
-    <div class="popup" id="loginPopup">
-        <div class="popup-content">
-            <span class="close-btn" onclick="hideLogin()">×</span>
-            <h2>Login</h2>
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <input type="email" id="loginEmail" placeholder="Email" required>
-                <input type="password" id="loginPassword" placeholder="Password" required>
-                <button type="submit">Login</button>
-            </form>
-        </div>
-    </div>
+    <!-- Loop Gallery -->
+    <section class="gallery">
+        <h2>Featured Loops</h2>
+        <div class="coming-soon">Coming Soon</div>
+    </section>
 
     <script>
-        // Your Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyA1uR_cMqX_F3_-tBy51UlxCQMoIeBjGws",
-            authDomain: "ajmerionline-67e32.firebaseapp.com",
-            projectId: "ajmerionline-67e32",
-            storageBucket: "ajmerionline-67e32.firebasestorage.app",
-            messagingSenderId: "807508767510",
-            appId: "1:807508767510:web:aa367978ba87adfe7f5637",
-            measurementId: "G-S5CPKK0N47"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        let isLoggedIn = false;
-        let userData = null;
-
-        // Check auth state on page load
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                isLoggedIn = true;
-                db.collection('users').doc(user.uid).get().then((doc) => {
-                    if (doc.exists) {
-                        userData = doc.data();
-                        updateAuthSection();
-                    }
-                }).catch((error) => {
-                    console.error("Error fetching user data:", error);
-                });
-            } else {
-                isLoggedIn = false;
-                userData = null;
-                updateAuthSection();
-            }
-        });
-
-        function showSignup() {
-            if (!isLoggedIn) {
-                document.getElementById('signupPopup').style.display = 'flex';
-            }
-        }
-
-        function hideSignup() {
-            document.getElementById('signupPopup').style.display = 'none';
-        }
-
-        function showLogin() {
-            if (!isLoggedIn) {
-                document.getElementById('loginPopup').style.display = 'flex';
-            }
-        }
-
-        function hideLogin() {
-            document.getElementById('loginPopup').style.display = 'none';
-        }
-
-        function handleSignup(event) {
-            event.preventDefault();
-            const username = document.getElementById('username').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    return db.collection('users').doc(user.uid).set({
-                        username: username,
-                        email: email
-                    });
-                })
-                .then(() => {
-                    alert('Sign Up Successful! Please log in.');
-                    hideSignup();
-                    document.getElementById('signupForm').reset();
-                    showLogin();
-                })
-                .catch((error) => {
-                    alert('Error: ' + error.message);
-                });
-        }
-
-        function handleLogin(event) {
-            event.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    return db.collection('users').doc(user.uid).get();
-                })
-                .then((doc) => {
-                    if (doc.exists) {
-                        userData = doc.data();
-                        isLoggedIn = true;
-                        alert('Login Successful! Welcome back, ' + userData.username);
-                        updateAuthSection();
-                        hideLogin();
-                        document.getElementById('loginForm').reset();
-                    }
-                })
-                .catch((error) => {
-                    alert('Error: ' + error.message);
-                });
-        }
-
-        function updateAuthSection() {
-            const authSection = document.getElementById('authSection');
-            if (isLoggedIn) {
-                authSection.innerHTML = `
-                    <span class="username-display">Welcome, ${userData.username}</span>
-                    <button class="auth-btn logout" onclick="handleLogout()">Logout</button>
-                `;
-            } else {
-                authSection.innerHTML = `
-                    <button class="auth-btn login" onclick="showLogin()">Login</button>
-                    <button class="auth-btn signup" onclick="showSignup()">Sign Up</button>
-                `;
-            }
-        }
-
-        function handleLogout() {
-            auth.signOut().then(() => {
-                isLoggedIn = false;
-                userData = null;
-                alert('Logged out successfully!');
-                updateAuthSection();
-            }).catch((error) => {
-                alert('Error: ' + error.message);
+        // JavaScript
+        document.addEventListener("DOMContentLoaded", () => {
+            const ctaBtn = document.querySelector(".cta-btn");
+            
+            ctaBtn.addEventListener("click", () => {
+                alert("Ready to dive into the beats? Let’s go!");
+                // Replace with actual navigation or functionality later
             });
-        }
+        });
     </script>
 </body>
 </html>
