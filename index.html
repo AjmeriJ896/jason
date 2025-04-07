@@ -67,14 +67,6 @@
             color: #000;
         }
 
-        #signup-link.disabled {
-            background: #555;
-            color: #999;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
         .username {
             color: #00ffff;
         }
@@ -327,24 +319,15 @@
             const uploadLink = document.getElementById("upload-link");
             const communityLink = document.getElementById("community-link");
 
-            // Check if user is already signed up or signed in
-            const savedEmail = localStorage.getItem("email");
+            // Check if user is already signed in
             const savedUsername = localStorage.getItem("username");
-            if (savedEmail) {
-                signupLink.classList.add("disabled");
-                signupLink.title = "Account already exists. Please sign in.";
-            }
             if (savedUsername) {
                 showLoggedInState(savedUsername);
             }
 
-            // Open Sign Up Modal (only if no user exists)
+            // Open Sign Up Modal
             signupLink.addEventListener("click", () => {
-                if (savedEmail) {
-                    alert("An account already exists. Please sign in or reset your password if needed.");
-                } else {
-                    signupModal.style.display = "flex";
-                }
+                signupModal.style.display = "flex";
             });
 
             // Open Sign In Modal
@@ -396,8 +379,6 @@
                     localStorage.setItem("password", password); // Demo only, not secure!
                     signupModal.style.display = "none";
                     agreementModal.style.display = "flex";
-                    signupLink.classList.add("disabled");
-                    signupLink.title = "Account already exists. Please sign in.";
                 }
             });
 
@@ -458,8 +439,6 @@
                 signinLink.style.display = "inline";
                 usernameDisplay.style.display = "none";
                 signoutLink.style.display = "none";
-                signupLink.classList.remove("disabled");
-                signupLink.title = "";
                 alert("Signed out successfully!");
             });
 
